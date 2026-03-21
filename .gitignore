@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+data/phishing_urls.csv
+data/legit_urls.csv
+data/dataset.csv
+models/*.pkl
+models/*.keras
+results/
+reports/
+*.DS_Store
