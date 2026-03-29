@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Batch Scan — PhishGuard Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex}
+.sidebar{width:220px;background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh}
+.sb-logo{padding:20px 16px;font-size:16px;font-weight:600;border-bottom:1px solid #30363d;color:#fff}
+.sb-logo span{color:#1D9E75}
+.sb-item{padding:8px 16px;display:flex;align-items:center;gap:10px;color:#8b949e;text-decoration:none;font-size:13px}
+.sb-item:hover{background:#21262d;color:#e6edf3}
+.sb-item.active{background:#1f2937;color:#1D9E75;border-left:2px solid #1D9E75}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-dot.green{background:#1D9E75}
+.sb-dot.gray{background:#30363d}
+.main{margin-left:220px;flex:1;padding:24px}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;margin-bottom:16px}
+.panel-title{font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+.upload-zone{border:2px dashed #30363d;border-radius:8px;padding:30px;text-align:center;cursor:pointer}
+.upload-zone:hover{border-color:#1D9E75}
+.upload-zone input{display:none}
+.upload-zone p{color:#8b949e;font-size:13px;margin-top:8px}
+.scan-btn{margin-top:12px;padding:10px 24px;background:#1D9E75;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500}
+.stats-row{display:flex;gap:12px;margin-bottom:16px}
+.stat{background:#21262d;border-radius:8px;padding:12px;text-align:center;flex:1}
+.stat-val{font-size:20px;font-weight:600}
+.stat-lbl{font-size:11px;color:#8b949e;margin-top:3px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#21262d;padding:8px 12px;text-align:left;color:#8b949e;font-weight:500}
+td{padding:8px 12px;border-bottom:1px solid #21262d}
+.badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.badge.p{background:rgba(226,75,74,.15);color:#E24B4A}
+.badge.l{background:rgba(29,158,117,.15);color:#1D9E75}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo">Phish<span>Guard</span> Pro</div>
+  <a href="/" class="sb-item"><div class="sb-dot gray"></div>Dashboard</a>
+  <a href="/scanner" class="sb-item"><div class="sb-dot gray"></div>URL Scanner</a>
+  <a href="/email" class="sb-item"><div class="sb-dot gray"></div>Email Scanner</a>
+  <a href="/qr" class="sb-item"><div class="sb-dot gray"></div>QR Scanner</a>
+  <a href="/batch" class="sb-item active"><div class="sb-dot green"></div>Batch Scan</a>
+  <a href="/history" class="sb-item"><div class="sb-dot gray"></div>Scan History</a>
+</div>
+<div class="main">
+  <div class="panel">
+    <div class="panel-title">Batch URL Scanner — Upload a .txt or .csv file</div>
+    <div class="upload-zone" onclick="document.getElementById('batch-file').click()">
+      <div style="font-size:32px">📂</div>
+      <p>Click to upload file (one URL per line)</p>
+      <p style="font-size:11px;margin-top:4px">Max 500 URLs per scan</p>
+      <input type="file" id="batch-file" accept=".txt,.csv"/>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:#8b949e" id="file-name">No file selected</div>
+    <button class="scan-btn" onclick="runBatch()">Scan All URLs</button>
+  </div>
+  <div id="stats-section" style="display:none">
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val" id="b-total">0</div><div class="stat-lbl">Total scanned</div></div>
+      <div class="stat"><div class="stat-val" style="color:#E24B4A" id="b-phish">0</div><div class="stat-lbl">Phishing</div></div>
+      <div class="stat"><div class="stat-val" style="color:#1D9E75" id="b-legit">0</div><div class="stat-lbl">Legitimate</div></div>
+    </div>
+  </div>
+  <div class="panel" id="results-panel" style="display:none">
+    <div class="panel-title">Results</div>
+    <table>
+      <thead><tr><th>URL</th><th>Verdict</th><th>Confidence</th></tr></thead>
+      <tbody id="results-body"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+document.getElementById('batch-file').onchange = function() {
+  document.getElementById('file-name').textContent = this.files[0]?.name || 'No file selected';
+};
+async function runBatch() {
+  const file = document.getElementById('batch-file').files[0];
+  if (!file) { alert('Please upload a file first.'); return; }
+  const form = new FormData();
+  form.append('file', file);
+  document.querySelector('.scan-btn').textContent = 'Scanning...';
+  try {
+    const r = await fetch('/api/batch', {method:'POST', body:form});
+    const d = await r.json();
+    if (d.error) { alert('Error: ' + d.error); return; }
+    document.getElementById('b-total').textContent = d.total;
+    document.getElementById('b-phish').textContent = d.phishing;
+    document.getElementById('b-legit').textContent = d.legitimate;
+    document.getElementById('stats-section').style.display = 'block';
+    let html = '';
+    for (const res of d.results) {
+      const isP = res.verdict === 'phishing';
+      html += `<tr>
+        <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${res.url}</td>
+        <td><span class="badge ${isP?'p':'l'}">${isP?'PHISHING':'LEGIT'}</span></td>
+        <td>${res.confidence.toFixed(1)}%</td>
+      </tr>`;
+    }
+    document.getElementById('results-body').innerHTML = html;
+    document.getElementById('results-panel').style.display = 'block';
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    document.querySelector('.scan-btn').textContent = 'Scan All URLs';
+  }
+}
+</script>
+</body>
+</html>

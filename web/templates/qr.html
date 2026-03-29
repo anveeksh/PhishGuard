@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>QR Scanner — PhishGuard Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex}
+.sidebar{width:220px;background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh}
+.sb-logo{padding:20px 16px;font-size:16px;font-weight:600;border-bottom:1px solid #30363d;color:#fff}
+.sb-logo span{color:#1D9E75}
+.sb-item{padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;color:#8b949e;text-decoration:none;font-size:13px}
+.sb-item:hover{background:#21262d;color:#e6edf3}
+.sb-item.active{background:#1f2937;color:#1D9E75;border-left:2px solid #1D9E75}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-dot.green{background:#1D9E75}
+.sb-dot.gray{background:#30363d}
+.main{margin-left:220px;flex:1;padding:24px}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:24px;max-width:600px}
+.panel-title{font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.6px;margin-bottom:20px}
+.upload-zone{border:2px dashed #30363d;border-radius:10px;padding:40px;text-align:center;cursor:pointer;transition:border-color .2s}
+.upload-zone:hover{border-color:#1D9E75}
+.upload-zone p{color:#8b949e;font-size:14px;margin-top:10px}
+.upload-zone input{display:none}
+.scan-btn{margin-top:16px;width:100%;padding:10px;background:#1D9E75;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:500}
+.scan-btn:hover{background:#17876a}
+#preview{max-width:200px;border-radius:8px;margin:12px auto;display:none}
+.result-box{margin-top:16px;border-radius:8px;padding:16px;display:none}
+.result-box.p{background:rgba(226,75,74,.1);border:1px solid rgba(226,75,74,.3)}
+.result-box.l{background:rgba(29,158,117,.1);border:1px solid rgba(29,158,117,.3)}
+.result-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.result-title.p{color:#E24B4A}
+.result-title.l{color:#1D9E75}
+.result-url{font-size:12px;color:#8b949e;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo">Phish<span>Guard</span> Pro</div>
+  <a href="/" class="sb-item"><div class="sb-dot gray"></div>Dashboard</a>
+  <a href="/scanner" class="sb-item"><div class="sb-dot gray"></div>URL Scanner</a>
+  <a href="/email" class="sb-item"><div class="sb-dot gray"></div>Email Scanner</a>
+  <a href="/qr" class="sb-item active"><div class="sb-dot green"></div>QR Scanner</a>
+  <a href="/batch" class="sb-item"><div class="sb-dot gray"></div>Batch Scan</a>
+  <a href="/history" class="sb-item"><div class="sb-dot gray"></div>Scan History</a>
+</div>
+<div class="main">
+  <div class="panel">
+    <div class="panel-title">QR Code Scanner — Upload a QR code image</div>
+    <div class="upload-zone" onclick="document.getElementById('qr-file').click()">
+      <div style="font-size:36px">📷</div>
+      <p>Click to upload QR code image</p>
+      <p style="font-size:12px;margin-top:4px">Supports PNG, JPG, JPEG</p>
+      <input type="file" id="qr-file" accept="image/*" onchange="previewQR(this)"/>
+    </div>
+    <img id="preview"/>
+    <button class="scan-btn" onclick="scanQR()">Decode & Scan QR Code</button>
+    <div class="result-box" id="result-box">
+      <div class="result-title" id="result-title"></div>
+      <div class="result-url" id="result-url"></div>
+      <div style="font-size:12px;color:#8b949e;margin-top:6px" id="result-conf"></div>
+    </div>
+  </div>
+</div>
+<script>
+function previewQR(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+async function scanQR() {
+  const file = document.getElementById('qr-file').files[0];
+  if (!file) { alert('Please upload a QR code image first.'); return; }
+  const form = new FormData();
+  form.append('file', file);
+  document.querySelector('.scan-btn').textContent = 'Scanning...';
+  try {
+    const r = await fetch('/api/qr', {method:'POST', body:form});
+    const d = await r.json();
+    if (d.error) { alert('Error: ' + d.error); return; }
+    const isP = d.verdict === 'phishing';
+    const box = document.getElementById('result-box');
+    box.className = 'result-box ' + (isP?'p':'l');
+    box.style.display = 'block';
+    document.getElementById('result-title').className = 'result-title ' + (isP?'p':'l');
+    document.getElementById('result-title').textContent = isP ? '🚨 PHISHING DETECTED' : '✅ LEGITIMATE URL';
+    document.getElementById('result-url').textContent = 'URL: ' + d.url;
+    document.getElementById('result-conf').textContent = 'Confidence: ' + d.confidence.toFixed(1) + '%';
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    document.querySelector('.scan-btn').textContent = 'Decode & Scan QR Code';
+  }
+}
+</script>
+</body>
+</html>

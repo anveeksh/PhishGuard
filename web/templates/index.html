@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhishGuard Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex}
+.sidebar{width:220px;background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;overflow-y:auto}
+.sb-logo{padding:20px 16px;font-size:16px;font-weight:600;border-bottom:1px solid #30363d;color:#fff}
+.sb-logo span{color:#1D9E75}
+.sb-section{padding:8px 0}
+.sb-label{padding:6px 16px;font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.8px}
+.sb-item{padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;color:#8b949e;text-decoration:none;font-size:13px;transition:all .15s}
+.sb-item:hover{background:#21262d;color:#e6edf3}
+.sb-item.active{background:#1f2937;color:#1D9E75;border-left:2px solid #1D9E75}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-dot.green{background:#1D9E75}
+.sb-dot.red{background:#E24B4A}
+.sb-dot.gray{background:#30363d}
+.sb-bottom{margin-top:auto;padding:16px;border-top:1px solid #30363d;font-size:11px;color:#8b949e}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.topbar{background:#161b22;border-bottom:1px solid #30363d;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.tb-title{font-size:14px;font-weight:500}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-badge{background:#E24B4A;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px}
+.tb-user{width:30px;height:30px;border-radius:50%;background:#0d214e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.content{padding:24px;flex:1}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px}
+.stat-val{font-size:28px;font-weight:600;line-height:1}
+.stat-lbl{font-size:12px;color:#8b949e;margin-top:6px}
+.stat-delta{font-size:11px;margin-top:4px}
+.panels{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:18px}
+.panel-title{font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+.scan-row{display:flex;gap:8px;margin-bottom:14px}
+.scan-row input{flex:1;padding:9px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px;outline:none}
+.scan-row input:focus{border-color:#1D9E75}
+.scan-btn{padding:9px 16px;background:#1D9E75;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500;white-space:nowrap}
+.scan-btn:hover{background:#17876a}
+.model-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.model-name{width:110px;font-size:12px;color:#8b949e;flex-shrink:0}
+.bar-bg{flex:1;background:#21262d;border-radius:3px;height:5px;overflow:hidden}
+.bar-fill{height:5px;border-radius:3px;transition:width .5s ease}
+.bar-p{background:#E24B4A}
+.bar-l{background:#1D9E75}
+.conf-pct{width:38px;font-size:11px;text-align:right;flex-shrink:0}
+.verdict-box{border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-top:12px}
+.verdict-box.p{background:rgba(226,75,74,.1);border:1px solid rgba(226,75,74,.3)}
+.verdict-box.l{background:rgba(29,158,117,.1);border:1px solid rgba(29,158,117,.3)}
+.verdict-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700}
+.verdict-icon.p{background:#E24B4A;color:#fff}
+.verdict-icon.l{background:#1D9E75;color:#fff}
+.verdict-text{font-size:13px;font-weight:600}
+.verdict-text.p{color:#E24B4A}
+.verdict-text.l{color:#1D9E75}
+.verdict-sub{font-size:11px;color:#8b949e;margin-top:2px}
+.log-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #21262d;font-size:12px}
+.log-row:last-child{border-bottom:none}
+.log-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.log-dot.p{background:#E24B4A}
+.log-dot.l{background:#1D9E75}
+.log-url{flex:1;color:#e6edf3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log-badge{font-size:10px;padding:2px 7px;border-radius:10px;flex-shrink:0;font-weight:500}
+.log-badge.p{background:rgba(226,75,74,.15);color:#E24B4A}
+.log-badge.l{background:rgba(29,158,117,.15);color:#1D9E75}
+.log-time{color:#8b949e;font-size:10px;flex-shrink:0}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.feature-item{background:#21262d;border-radius:6px;padding:8px 10px;font-size:11px;color:#8b949e}
+.feature-val{font-size:13px;color:#e6edf3;font-weight:500}
+.empty-state{text-align:center;padding:40px 20px;color:#8b949e;font-size:13px}
+.scanning{opacity:.6;font-size:12px;color:#8b949e;padding:10px 0}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sb-logo">Phish<span>Guard</span> Pro</div>
+  <div class="sb-section">
+    <div class="sb-label">Detection</div>
+    <a href="/" class="sb-item active"><div class="sb-dot green"></div>Dashboard</a>
+    <a href="/scanner" class="sb-item"><div class="sb-dot gray"></div>URL Scanner</a>
+    <a href="/email" class="sb-item"><div class="sb-dot gray"></div>Email Scanner</a>
+    <a href="/qr" class="sb-item"><div class="sb-dot gray"></div>QR Scanner</a>
+    <a href="/batch" class="sb-item"><div class="sb-dot gray"></div>Batch Scan</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Intelligence</div>
+    <a href="#" class="sb-item" onclick="showWhois()"><div class="sb-dot gray"></div>WHOIS Checker</a>
+    <a href="#" class="sb-item" onclick="showTypo()"><div class="sb-dot gray"></div>Typosquat Detector</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Reports</div>
+    <a href="/history" class="sb-item"><div class="sb-dot gray"></div>Scan History</a>
+    <a href="/report" class="sb-item"><div class="sb-dot gray"></div>Generate Report</a>
+  </div>
+  <div class="sb-bottom">
+    PhishGuard Pro v2.0<br>
+    github.com/anveeksh
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Threat Detection Dashboard</div>
+    <div class="tb-right">
+      {% if phish > 0 %}
+      <div class="tb-badge">{{ phish }} threats detected</div>
+      {% endif %}
+      <div class="tb-user">AR</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" style="color:#E24B4A">{{ phish }}</div>
+        <div class="stat-lbl">Phishing detected</div>
+        <div class="stat-delta" style="color:#8b949e">Session total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:#1D9E75">{{ legit }}</div>
+        <div class="stat-lbl">Legitimate URLs</div>
+        <div class="stat-delta" style="color:#8b949e">Session total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">{{ total }}</div>
+        <div class="stat-lbl">Total scanned</div>
+        <div class="stat-delta" style="color:#8b949e">This session</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" style="color:#EF9F27">99.5%</div>
+        <div class="stat-lbl">Model accuracy</div>
+        <div class="stat-delta" style="color:#8b949e">RF · XGB · NN</div>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-title">Quick URL Scanner</div>
+        <div class="scan-row">
+          <input type="text" id="url-input" placeholder="Paste any URL to scan..." onkeydown="if(event.key==='Enter')scanURL()"/>
+          <button class="scan-btn" onclick="scanURL()">Scan</button>
+        </div>
+        <div id="scan-results">
+          <div class="empty-state">Enter a URL above to scan it with all 3 AI models</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Recent Scan Log</div>
+        <div id="log-list">
+          {% if history %}
+            {% for s in history %}
+            <div class="log-row">
+              <div class="log-dot {{ 'p' if s.verdict == 'phishing' else 'l' }}"></div>
+              <div class="log-url">{{ s.url[:45] }}</div>
+              <div class="log-badge {{ 'p' if s.verdict == 'phishing' else 'l' }}">
+                {{ 'PHISH' if s.verdict == 'phishing' else 'LEGIT' }}
+              </div>
+              <div class="log-time">{{ s.timestamp[11:16] }}</div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">No scans yet this session</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function scanURL() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url) return;
+  const res = document.getElementById('scan-results');
+  res.innerHTML = '<div class="scanning">Scanning with 3 AI models...</div>';
+  try {
+    const r = await fetch('/api/scan', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({url})
+    });
+    const d = await r.json();
+    if (d.error) { res.innerHTML = `<div style="color:#E24B4A;font-size:13px">${d.error}</div>`; return; }
+    const isP = d.verdict === 'phishing';
+    const cls = isP ? 'p' : 'l';
+    const icon = isP ? '!' : '✓';
+    const label = isP ? 'PHISHING DETECTED' : 'LEGITIMATE URL';
+    let html = '';
+    for (const [model, info] of Object.entries(d.models)) {
+      const mc = info.label === 'phishing' ? 'p' : 'l';
+      const pct = info.label === 'phishing' ? info.confidence : (100 - info.confidence);
+      html += `<div class="model-row">
+        <div class="model-name">${model}</div>
+        <div class="bar-bg"><div class="bar-fill bar-${mc}" style="width:${Math.min(pct,100).toFixed(0)}%"></div></div>
+        <div class="conf-pct" style="color:${mc==='p'?'#E24B4A':'#1D9E75'}">${pct.toFixed(0)}%</div>
+      </div>`;
+    }
+    html += `<div class="verdict-box ${cls}">
+      <div class="verdict-icon ${cls}">${icon}</div>
+      <div>
+        <div class="verdict-text ${cls}">${label}</div>
+        <div class="verdict-sub">avg confidence ${d.confidence.toFixed(1)}%</div>
+      </div>
+    </div>`;
+    res.innerHTML = html;
+    addToLog(d);
+  } catch(e) {
+    res.innerHTML = `<div style="color:#E24B4A;font-size:13px">Error: ${e.message}</div>`;
+  }
+}
+
+function addToLog(d) {
+  const log = document.getElementById('log-list');
+  const cls = d.verdict === 'phishing' ? 'p' : 'l';
+  const lbl = d.verdict === 'phishing' ? 'PHISH' : 'LEGIT';
+  const time = new Date().toTimeString().slice(0,5);
+  const row = `<div class="log-row">
+    <div class="log-dot ${cls}"></div>
+    <div class="log-url">${d.url.slice(0,45)}</div>
+    <div class="log-badge ${cls}">${lbl}</div>
+    <div class="log-time">${time}</div>
+  </div>`;
+  if (log.querySelector('.empty-state')) log.innerHTML = '';
+  log.insertAdjacentHTML('afterbegin', row);
+}
+
+function showWhois() {
+  const domain = prompt('Enter domain to check WHOIS:');
+  if (!domain) return;
+  fetch('/api/whois', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({domain})})
+    .then(r=>r.json()).then(d=>{
+      if(d.error){alert('Error: '+d.error);return;}
+      alert(`WHOIS: ${domain}\n\nRegistrar: ${d.registrar}\nCreated: ${d.created}\nAge: ${d.age_days} days\nCountry: ${d.country}\n\n${d.suspicious?'⚠️ SUSPICIOUS — domain less than 30 days old!':'✅ Domain age looks normal'}`);
+    });
+}
+
+function showTypo() {
+  const domain = prompt('Enter domain to check for typosquatting:');
+  if (!domain) return;
+  fetch('/api/typosquat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({domain})})
+    .then(r=>r.json()).then(d=>{
+      if(d.error){alert('Error: '+d.error);return;}
+      if(d.similar.length===0){alert(`✅ No typosquatting detected for: ${domain}`);}
+      else{alert(`⚠️ Possible typosquatting detected!\n\n${domain} is similar to:\n${d.similar.map(s=>s.brand+' ('+s.similarity+' similarity)').join('\n')}`);}
+    });
+}
+</script>
+</body>
+</html>

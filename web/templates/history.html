@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Scan History — PhishGuard Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex}
+.sidebar{width:220px;background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh}
+.sb-logo{padding:20px 16px;font-size:16px;font-weight:600;border-bottom:1px solid #30363d;color:#fff}
+.sb-logo span{color:#1D9E75}
+.sb-item{padding:8px 16px;display:flex;align-items:center;gap:10px;color:#8b949e;text-decoration:none;font-size:13px}
+.sb-item:hover{background:#21262d;color:#e6edf3}
+.sb-item.active{background:#1f2937;color:#1D9E75;border-left:2px solid #1D9E75}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-dot.green{background:#1D9E75}
+.sb-dot.gray{background:#30363d}
+.main{margin-left:220px;flex:1;padding:24px}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px}
+.panel-title{font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#21262d;padding:10px 12px;text-align:left;color:#8b949e;font-weight:500}
+td{padding:10px 12px;border-bottom:1px solid #21262d;vertical-align:middle}
+.badge{font-size:10px;padding:3px 8px;border-radius:10px;font-weight:500}
+.badge.p{background:rgba(226,75,74,.15);color:#E24B4A}
+.badge.l{background:rgba(29,158,117,.15);color:#1D9E75}
+.empty{text-align:center;padding:40px;color:#8b949e;font-size:13px}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo">Phish<span>Guard</span> Pro</div>
+  <a href="/" class="sb-item"><div class="sb-dot gray"></div>Dashboard</a>
+  <a href="/scanner" class="sb-item"><div class="sb-dot gray"></div>URL Scanner</a>
+  <a href="/email" class="sb-item"><div class="sb-dot gray"></div>Email Scanner</a>
+  <a href="/qr" class="sb-item"><div class="sb-dot gray"></div>QR Scanner</a>
+  <a href="/batch" class="sb-item"><div class="sb-dot gray"></div>Batch Scan</a>
+  <a href="/history" class="sb-item active"><div class="sb-dot green"></div>Scan History</a>
+</div>
+<div class="main">
+  <div class="panel">
+    <div class="panel-title">Complete Scan History — {{ history|length }} total scans</div>
+    {% if history %}
+    <table>
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>Verdict</th>
+          <th>Confidence</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in history %}
+        <tr>
+          <td style="max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.url }}</td>
+          <td><span class="badge {{ 'p' if s.verdict == 'phishing' else 'l' }}">{{ 'PHISHING' if s.verdict == 'phishing' else 'LEGIT' }}</span></td>
+          <td>{{ "%.1f"|format(s.confidence) }}%</td>
+          <td style="color:#8b949e">{{ s.timestamp[11:19] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">No scans yet this session. Start scanning URLs from the dashboard!</div>
+    {% endif %}
+  </div>
+</div>
+</body>
+</html>

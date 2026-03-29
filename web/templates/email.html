@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Email Scanner — PhishGuard Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex}
+.sidebar{width:220px;background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh}
+.sb-logo{padding:20px 16px;font-size:16px;font-weight:600;border-bottom:1px solid #30363d;color:#fff}
+.sb-logo span{color:#1D9E75}
+.sb-item{padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;color:#8b949e;text-decoration:none;font-size:13px;transition:all .15s}
+.sb-item:hover{background:#21262d;color:#e6edf3}
+.sb-item.active{background:#1f2937;color:#1D9E75;border-left:2px solid #1D9E75}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-dot.green{background:#1D9E75}
+.sb-dot.gray{background:#30363d}
+.main{margin-left:220px;flex:1;padding:24px}
+.panel{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;margin-bottom:16px}
+.panel-title{font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+textarea{width:100%;height:200px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px;padding:12px;resize:vertical;outline:none;font-family:monospace}
+textarea:focus{border-color:#1D9E75}
+.scan-btn{margin-top:10px;padding:10px 24px;background:#1D9E75;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500}
+.scan-btn:hover{background:#17876a}
+.result-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #21262d;font-size:13px}
+.result-row:last-child{border-bottom:none}
+.badge{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:500;flex-shrink:0}
+.badge.p{background:rgba(226,75,74,.15);color:#E24B4A}
+.badge.l{background:rgba(29,158,117,.15);color:#1D9E75}
+.url-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8b949e}
+.conf{font-size:11px;color:#8b949e;flex-shrink:0}
+.stats-row{display:flex;gap:16px;margin-bottom:16px}
+.stat{background:#21262d;border-radius:8px;padding:12px 16px;text-align:center;flex:1}
+.stat-val{font-size:22px;font-weight:600}
+.stat-lbl{font-size:11px;color:#8b949e;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo">Phish<span>Guard</span> Pro</div>
+  <a href="/" class="sb-item"><div class="sb-dot gray"></div>Dashboard</a>
+  <a href="/scanner" class="sb-item"><div class="sb-dot gray"></div>URL Scanner</a>
+  <a href="/email" class="sb-item active"><div class="sb-dot green"></div>Email Scanner</a>
+  <a href="/qr" class="sb-item"><div class="sb-dot gray"></div>QR Scanner</a>
+  <a href="/batch" class="sb-item"><div class="sb-dot gray"></div>Batch Scan</a>
+  <a href="/history" class="sb-item"><div class="sb-dot gray"></div>Scan History</a>
+</div>
+<div class="main">
+  <div class="panel">
+    <div class="panel-title">Email Scanner — Paste suspicious email content</div>
+    <textarea id="email-content" placeholder="Paste the full email content here — including headers, body, and any links. PhishGuard will automatically extract and scan all URLs found in the email..."></textarea>
+    <button class="scan-btn" onclick="scanEmail()">Extract & Scan All Links</button>
+  </div>
+  <div id="stats-section" style="display:none">
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val" id="total-found">0</div><div class="stat-lbl">URLs found</div></div>
+      <div class="stat"><div class="stat-val" style="color:#E24B4A" id="phish-found">0</div><div class="stat-lbl">Phishing</div></div>
+      <div class="stat"><div class="stat-val" style="color:#1D9E75" id="legit-found">0</div><div class="stat-lbl">Legitimate</div></div>
+    </div>
+  </div>
+  <div class="panel" id="results-panel" style="display:none">
+    <div class="panel-title">Scan Results</div>
+    <div id="results-list"></div>
+  </div>
+</div>
+<script>
+async function scanEmail() {
+  const content = document.getElementById('email-content').value.trim();
+  if (!content) return;
+  document.querySelector('.scan-btn').textContent = 'Scanning...';
+  try {
+    const r = await fetch('/api/email', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({content})
+    });
+    const d = await r.json();
+    if (d.error) { alert('Error: ' + d.error); return; }
+    document.getElementById('total-found').textContent = d.total;
+    document.getElementById('phish-found').textContent = d.phishing;
+    document.getElementById('legit-found').textContent = d.legitimate;
+    document.getElementById('stats-section').style.display = 'block';
+    let html = '';
+    if (d.total === 0) {
+      html = '<div style="color:#8b949e;font-size:13px;padding:20px 0">No URLs found in email content.</div>';
+    } else {
+      for (const res of d.results) {
+        const isP = res.verdict === 'phishing';
+        html += `<div class="result-row">
+          <div class="badge ${isP?'p':'l'}">${isP?'PHISHING':'LEGIT'}</div>
+          <div class="url-text">${res.url}</div>
+          <div class="conf">${res.confidence.toFixed(1)}%</div>
+        </div>`;
+      }
+    }
+    document.getElementById('results-list').innerHTML = html;
+    document.getElementById('results-panel').style.display = 'block';
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    document.querySelector('.scan-btn').textContent = 'Extract & Scan All Links';
+  }
+}
+</script>
+</body>
+</html>
