@@ -10,3 +10,4 @@ models/*.keras
 results/
 reports/
 *.DS_Store
+web/__pycache__/
