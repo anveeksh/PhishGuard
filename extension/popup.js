@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:8000/scan-url";
+const API = "https://phishguard-ov40.onrender.com/scan-url";
 const scanBtn    = document.getElementById("scanBtn");
 const btnText    = document.getElementById("btnText");
 const statusDot  = document.getElementById("statusDot");

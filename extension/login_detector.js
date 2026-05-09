@@ -3,7 +3,7 @@
 if (window.__pgLoginLoaded) return;
 window.__pgLoginLoaded = true;
 
-const PG_LOGIN_API = "http://127.0.0.1:8000/scan-url";
+const PG_LOGIN_API = "https://phishguard-ov40.onrender.com/scan-url";
 const PG_LOGIN_TRUSTED = new Set([
   "google.com","gmail.com","apple.com","microsoft.com","amazon.com",
   "github.com","facebook.com","twitter.com","x.com","linkedin.com",

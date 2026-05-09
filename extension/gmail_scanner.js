@@ -3,7 +3,7 @@
 if (window.__pgGmailLoaded) return;
 window.__pgGmailLoaded = true;
 
-const GMAIL_API = "http://127.0.0.1:8000/scan-url";
+const GMAIL_API = "https://phishguard-ov40.onrender.com/scan-url";
 const GMAIL_TRUSTED = new Set([
   "google.com","gmail.com","youtube.com","apple.com","microsoft.com",
   "amazon.com","github.com","facebook.com","twitter.com","x.com",

@@ -22,7 +22,7 @@ export default function App(){
   const [result,setResult]=useState(null);
   const [loading,setLoading]=useState(false);
   const [page,setPage]=useState("scanner");
-  const runScan=async()=>{const t=url.trim();if(!t)return;setLoading(true);setResult(null);try{const res=await fetch("http://127.0.0.1:8000/scan-url",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:t})});setResult(await res.json());}catch{setResult(mockScan(t));}setLoading(false);};
+  const runScan=async()=>{const t=url.trim();if(!t)return;setLoading(true);setResult(null);try{const res=await fetch("https://phishguard-ov40.onrender.com/scan-url",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:t})});setResult(await res.json());}catch{setResult(mockScan(t));}setLoading(false);};
   const tryExample=(ex)=>{setUrl(ex);setTimeout(runScan,10);};
   const vc=result?result.verdict.toLowerCase():"";
   if(page==="features")return(<div className="app"><div className="bg-grid"/><div className="bg-orb orb1"/><div className="bg-orb orb2"/><div className="bg-orb orb3"/><div className="wrap"><nav><div className="logo"><div className="logo-icon">{icons.shield}</div>PhishGuard</div><div className="nav-pill"><a onClick={()=>setPage("scanner")}>Scanner</a><a onClick={()=>setPage("features")} className="active">Features</a><a onClick={()=>setPage("extension")}>Extension</a><a onClick={()=>setPage("docs")}>Docs</a></div><button className="nav-cta" onClick={()=>setPage("scanner")}>← Scanner</button></nav></div><Features/><Footer/></div>);

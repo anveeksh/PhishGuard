@@ -1,4 +1,4 @@
-const PG_API       = "http://127.0.0.1:8000/scan-url";
+const PG_API       = "https://phishguard-ov40.onrender.com/scan-url";
 const PG_MAX_LINKS = 50;
 const PG_TRUSTED   = new Set([
   "google.com","gmail.com","youtube.com","apple.com","icloud.com",
