@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PhishGuard AI</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="pg-wrap">
+    <div class="pg-header">
+      <div class="pg-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+          <path d="M12 3l9 4.5v5C21 17.25 17 21.5 12 23c-5-1.5-9-5.75-9-10.5v-5L12 3z"/>
+        </svg>
+        <span>PhishGuard <em>AI</em></span>
+      </div>
+      <div class="pg-status" id="statusDot">
+        <span class="dot"></span>
+        <span class="status-text">Ready</span>
+      </div>
+    </div>
+
+    <div class="pg-url-bar" id="urlBar">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <span id="currentUrl">Loading page...</span>
+    </div>
+
+    <button class="pg-scan-btn" id="scanBtn">
+      <span class="spinner"></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 3l9 4.5v5C21 17.25 17 21.5 12 23c-5-1.5-9-5.75-9-10.5v-5L12 3z"/>
+      </svg>
+      <span id="btnText">Scan This Page</span>
+    </button>
+
+    <div class="pg-result" id="resultCard" style="display:none">
+      <div class="pg-verdict-row" id="verdictRow">
+        <div class="pg-verdict-icon" id="verdictIcon"></div>
+        <div class="pg-verdict-info">
+          <div class="pg-verdict-label" id="verdictLabel">-</div>
+          <div class="pg-verdict-domain" id="verdictDomain">-</div>
+        </div>
+        <div class="pg-score-ring" id="scoreRing">
+          <strong id="scoreNum">-</strong>
+          <span>/100</span>
+        </div>
+      </div>
+      <div class="pg-meta">
+        <div class="pg-meta-item">
+          <div class="pg-meta-label">SEVERITY</div>
+          <div class="pg-meta-val" id="metaSeverity">-</div>
+        </div>
+        <div class="pg-meta-item">
+          <div class="pg-meta-label">SIGNALS</div>
+          <div class="pg-meta-val" id="metaSignals">-</div>
+        </div>
+        <div class="pg-meta-item">
+          <div class="pg-meta-label">ENGINE</div>
+          <div class="pg-meta-val">ML + Rules</div>
+        </div>
+      </div>
+      <div class="pg-reasons" id="reasonsList"></div>
+    </div>
+
+    <div class="pg-idle" id="idleState">
+      <div class="pg-idle-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.5">
+          <path d="M12 3l9 4.5v5C21 17.25 17 21.5 12 23c-5-1.5-9-5.75-9-10.5v-5L12 3z"/>
+        </svg>
+      </div>
+      <p>Press <strong>Scan This Page</strong> to analyze the current URL for phishing threats.</p>
+    </div>
+
+    <div class="pg-error" id="errorState" style="display:none">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p id="errorMsg">Backend not running. Start FastAPI first.</p>
+    </div>
+
+    <div class="pg-footer">
+      <span>PhishGuard v2.0</span>
+      <span>RF · XGB · NN</span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
