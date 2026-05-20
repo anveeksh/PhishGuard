@@ -1,4 +1,4 @@
-app = "phishguard"
+app = "phishguard-misty-water-1803"
 primary_region = "ord"
 
 [build]
