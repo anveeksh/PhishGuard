@@ -5,7 +5,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 
-from scanner import extract_features
+from scanner import extract_features, _features_dict
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
@@ -170,7 +170,7 @@ def mutate_legit() -> str:
 
 
 def vectorize(url: str) -> list[float]:
-    features = extract_features(url)
+    features = _features_dict(url)
     row = []
 
     for key in FEATURE_KEYS:

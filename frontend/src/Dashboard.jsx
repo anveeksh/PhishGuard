@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-const API = "https://phishguard-ov40.onrender.com";
+const API = "https://phishguard-288478513954.us-central1.run.app";
 function Bar({ value, max, color }) {
   const pct = max > 0 ? (value / max) * 100 : 0;
   return <div style={{background:"#0f172a",borderRadius:6,height:8,overflow:"hidden",flex:1}}><div style={{width:`${pct}%`,height:"100%",background:color,borderRadius:6,transition:"width 0.6s ease"}}/></div>;
